@@ -1,4 +1,6 @@
-﻿#if ENABLE_INSTALOD
+﻿
+using Unity.Collections;
+#if ENABLE_INSTALOD
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -69,7 +71,8 @@ namespace Unity.AutoLOD
             MonoBehaviourHelper.ExecuteOnMainThread(() =>
             {
                 var mf = renderer.GetComponent<MeshFilter>();
-                mf.sharedMesh.ApplyToWorkingMesh(outputMesh);
+                mf.sharedMesh.ToWorkingMesh(Allocator.Persistent);
+                //mf.sharedMesh.ApplyToWorkingMesh(outputMesh);
                 UnityObject.DestroyImmediate(mf.gameObject);
             });
         }
