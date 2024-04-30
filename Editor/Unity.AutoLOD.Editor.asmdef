@@ -1,10 +1,12 @@
 {
     "name": "Unity.AutoLOD.Editor",
+    "rootNamespace": "",
     "references": [
         "Unity.AutoLOD",
-        "Whinarn.UnityMeshSimplifier.Runtime"
+        "Whinarn.UnityMeshSimplifier.Runtime",
+        "Unity.InstaLOD",
+        "Unity.InstaLOD.Editor"
     ],
-    "optionalUnityReferences": [],
     "includePlatforms": [
         "Editor"
     ],
@@ -13,5 +15,7 @@
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": []
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
 }
