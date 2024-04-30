@@ -40,9 +40,9 @@ Experimental means this:
 ### Cloning locally to your project (requires [git-lfs](https://git-lfs.github.com/))
 1. Create a new Unity project or use an existing one
 2. From the command line change directory to your project's `Packages` directory.
-3. Run `git lfs clone https://github.com/StCost/AutoLOD`
+3. Run `git lfs clone https://github.com/YvesAlbuquerque/AutoLOD`
 
 ### Download as ZIP / Manual Install
-1. Visit GitHub's [AutoLOD](https://github.com/StCost/AutoLOD) repository
+1. Visit GitHub's [AutoLOD](https://github.com/YvesAlbuquerque/AutoLOD) repository
 2. Click the green `Code` button and select `Download ZIP`
 3. Extract the contents of the ZIP file into your project

@@ -1,23 +1,23 @@
 {
-  "name": "com.stcost.autolod",
-  "displayName": "AutoLOD",
-  "version": "0.1.0",
-  "unity": "2021.2",
-  "description": "Automatic LOD generation",
-  "keywords": [
-    "autolod",
-    "lod",
-    "3d",
-    "mesh",
-    "polygon",
-    "triangle",
-    "simplification",
-    "decimation",
-    "reduction",
-    "optimization"
-  ],
-  "author": {
-    "name": "StCost"
-  },
-  "bugs": "https://github.com/StCost/AutoLOD/issues"
+    "name": "com.yvesalbuquerque.autolod",
+    "displayName": "AutoLOD",
+    "version": "0.1.1",
+    "unity": "2021.2",
+    "description": "Automatic LOD generation",
+    "keywords": [
+        "autolod",
+        "lod",
+        "3d",
+        "mesh",
+        "polygon",
+        "triangle",
+        "simplification",
+        "decimation",
+        "reduction",
+        "optimization"
+    ],
+    "author": {
+        "name": "Yves"
+    },
+    "bugs": "https://github.com/YvesAlbuquerque/AutoLOD/issues"
 }
