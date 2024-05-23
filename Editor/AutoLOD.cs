@@ -169,12 +169,13 @@ namespace Unity.AutoLOD
                 {
                     s_MeshSimplifiers = ObjectUtils.GetImplementationsOfInterface(typeof(IMeshSimplifier)).ToList();
                     
-                    // Ensure InstaLODMeshSimplifier is included
-                    var instaLODType = Type.GetType("Unity.AutoLOD.InstaLODMeshSimplifier, Assembly-CSharp");
-                    if (instaLODType != null && !s_MeshSimplifiers.Contains(instaLODType))
+#if ENABLE_INSTALOD
+                    var instaLODSimplifier = Type.GetType("Unity.AutoLOD.InstaLODMeshSimplifier, Assembly-CSharp-Editor");
+                    if (instaLODSimplifier != null)
                     {
-                        s_MeshSimplifiers.Add(instaLODType);
+                        s_MeshSimplifiers.Add(instaLODSimplifier);
                     }
+#endif
                 }
 
                 return s_MeshSimplifiers;
