@@ -15,7 +15,7 @@ using UnityObject = UnityEngine.Object;
 #if ENABLE_INSTALOD
 namespace Unity.AutoLOD
 {
-    public struct InstaLODMeshSimplifier : IMeshSimplifier
+    public struct InstaLODMeshSimplifier : IMeshSimplifier, IPreferences
     {
         static object executionLock = new object();
 
@@ -72,9 +72,15 @@ namespace Unity.AutoLOD
             {
                 var mf = renderer.GetComponent<MeshFilter>();
                 mf.sharedMesh.ToWorkingMesh(Allocator.Persistent);
-                //mf.sharedMesh.ApplyToWorkingMesh(outputMesh);
+                mf.sharedMesh.ApplyToWorkingMesh(ref outputMesh);
                 UnityObject.DestroyImmediate(mf.gameObject);
             });
+        }
+
+        public void OnPreferencesGUI()
+        {
+            // Implement the preferences GUI if needed for InstaLOD settings
+            GUILayout.Label("InstaLOD settings are configured externally.");
         }
     }
 }
