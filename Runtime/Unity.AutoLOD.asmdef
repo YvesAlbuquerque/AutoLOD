@@ -1,7 +1,8 @@
 {
     "name": "Unity.AutoLOD",
-    "rootNamespace": "",
-    "references": [],
+    "references": [
+        "Unity.InstaLOD"
+    ],
     "includePlatforms": [
         "Editor",
         "macOSStandalone",
