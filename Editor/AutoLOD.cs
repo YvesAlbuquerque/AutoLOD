@@ -6,6 +6,10 @@
 #define HAS_NEW_PACKAGE_MANAGER 
 #endif
 
+#if ENABLE_INSTALOD
+#define HAS_INSTALOD
+#endif
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -67,6 +71,10 @@ namespace Unity.AutoLOD
             get
             {
                 var type = Type.GetType(EditorPrefs.GetString(k_DefaultMeshSimplifier, k_DefaultMeshSimplifierDefault));
+                
+                if (type == null || !typeof(IMeshSimplifier).IsAssignableFrom(type))
+                    type = Type.GetType(k_DefaultMeshSimplifierDefault);
+                
                 if (type == null && meshSimplifiers.Count > 0)
                     type = Type.GetType(meshSimplifiers[0].AssemblyQualifiedName);
                 return type;
@@ -158,7 +166,16 @@ namespace Unity.AutoLOD
             get
             {
                 if (s_MeshSimplifiers == null || s_MeshSimplifiers.Count == 0)
+                {
                     s_MeshSimplifiers = ObjectUtils.GetImplementationsOfInterface(typeof(IMeshSimplifier)).ToList();
+                    
+                    // Ensure InstaLODMeshSimplifier is included
+                    var instaLODType = Type.GetType("Unity.AutoLOD.InstaLODMeshSimplifier, Assembly-CSharp");
+                    if (instaLODType != null && !s_MeshSimplifiers.Contains(instaLODType))
+                    {
+                        s_MeshSimplifiers.Add(instaLODType);
+                    }
+                }
 
                 return s_MeshSimplifiers;
             }
@@ -174,6 +191,17 @@ namespace Unity.AutoLOD
                 return s_Batchers;
             }
         }
+        
+        static bool useSameMaterialForLODs
+        {
+            get { return EditorPrefs.GetBool("AutoLOD.UseSameMaterialForLODs", false); }
+            set
+            {
+                EditorPrefs.SetBool("AutoLOD.UseSameMaterialForLODs", value);
+                UpdateDependencies();
+            }
+        }
+
 
         static SceneLOD s_SceneLOD;
         static List<Type> s_MeshSimplifiers;
@@ -646,6 +674,11 @@ namespace Unity.AutoLOD
                         EditorUtility.CopySerialized(mf, lodMF);
                         EditorUtility.CopySerialized(mf.GetComponent<MeshRenderer>(), lodRenderer);
 
+                        if (useSameMaterialForLODs)
+                        {
+                            lodRenderer.sharedMaterials = mf.GetComponent<MeshRenderer>().sharedMaterials;
+                        }
+
                         var simplifiedMesh = new Mesh();
                         simplifiedMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
                         simplifiedMesh.name = sharedMesh.name + string.Format(" LOD{0}", l);
@@ -872,6 +905,14 @@ namespace Unity.AutoLOD
                     saveAssets = saveAssetsOnImport;
             }
 
+            // Use Same Material for LODs
+            {
+                var label = new GUIContent("Use Same Material for LODs", "If enabled, all LODs will use the same material as LOD0.");
+                EditorGUI.BeginChangeCheck();
+                var useSameMaterial = EditorGUILayout.Toggle(label, useSameMaterialForLODs);
+                if (EditorGUI.EndChangeCheck())
+                    useSameMaterialForLODs = useSameMaterial;
+            }
 
             // Use SceneLOD?
             {
