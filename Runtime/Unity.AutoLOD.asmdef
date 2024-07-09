@@ -1,7 +1,9 @@
 {
     "name": "Unity.AutoLOD",
+    "rootNamespace": "",
     "references": [
-        "Unity.InstaLOD"
+        "Unity.InstaLOD",
+        "Whinarn.UnityMeshSimplifier.Runtime"
     ],
     "includePlatforms": [
         "Editor",

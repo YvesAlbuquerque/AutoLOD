@@ -5,7 +5,8 @@
         "Unity.AutoLOD",
         "Whinarn.UnityMeshSimplifier.Runtime",
         "Unity.InstaLOD",
-        "Unity.InstaLOD.Editor"
+        "Unity.InstaLOD.Editor",
+        "Whinarn.UnityMeshSimplifier.Editor"
     ],
     "includePlatforms": [
         "Editor"
