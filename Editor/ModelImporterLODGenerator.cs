@@ -20,6 +20,7 @@ namespace Unity.AutoLOD
         public static Type meshSimplifierType { set; get; }
         public static int maxLOD { set; get; }
         public static int initialLODMaxPolyCount { set; get; }
+        public static LODHierarchyType hierarchyType { set; get; }
 
         const HideFlags k_DefaultHideFlags = HideFlags.None;
 
@@ -223,15 +224,21 @@ namespace Unity.AutoLOD
         /// <param name="meshLODs">The list to store the generated mesh LODs.</param>
         void GenerateLODs(GameObject go, MeshFilter[] originalMeshFilters, LODImportSettings importSettings, LODData lodData, List<IMeshLOD> meshLODs)
         {
+            var lodMeshes = new List<Renderer>();
+            var newGo = new GameObject("Y");
+            newGo.transform.localPosition = Vector3.zero;
+            newGo.transform.localRotation = Quaternion.identity;
+            newGo.transform.localScale = Vector3.one;
+            
             for (int i = 1; i <= importSettings.maxLODGenerated; i++)
             {
-                var lodMeshes = new List<Renderer>();
-
+                
                 foreach (var mf in originalMeshFilters)
                 {
                     var inputMesh = mf.sharedMesh;
+                    newGo.transform.parent = mf.transform;
 
-                    var lodTransform = CreateLODTransform(mf, i);
+                    var lodTransform = CreateLODTransform(newGo, mf, i);
                     var lodMF = lodTransform.GetComponent<MeshFilter>();
                     var lodRenderer = lodTransform.GetComponent<MeshRenderer>();
 
@@ -264,10 +271,10 @@ namespace Unity.AutoLOD
         /// <param name="mf">The original MeshFilter.</param>
         /// <param name="lodIndex">The LOD index.</param>
         /// <returns>The created LOD transform.</returns>
-        Transform CreateLODTransform(MeshFilter mf, int lodIndex)
+        Transform CreateLODTransform(GameObject newGo, MeshFilter mf, int lodIndex)
         {
             var lodTransform = EditorUtility.CreateGameObjectWithHideFlags(mf.name, k_DefaultHideFlags, typeof(MeshFilter), typeof(MeshRenderer)).transform;
-            lodTransform.parent = mf.transform;
+            lodTransform.parent = newGo.transform;
             lodTransform.localPosition = Vector3.zero;
             lodTransform.localRotation = Quaternion.identity;
             lodTransform.localScale = Vector3.one;
@@ -296,7 +303,9 @@ namespace Unity.AutoLOD
         {
             if (string.IsNullOrEmpty(AssetDatabase.GetAssetPath(lodData)))
             {
-                AssetDatabase.CreateAsset(lodData, GetLODDataPath(assetPath));
+                var lodDataPath = GetLODDataPath(assetPath);
+                AssetDatabase.CreateAsset(lodData, lodDataPath);
+                AssetDatabase.SaveAssets();
             }
             else
             {
@@ -306,15 +315,22 @@ namespace Unity.AutoLOD
                     if (o is Mesh mesh)
                         UnityObject.DestroyImmediate(mesh, true);
                 }
+
+                for (int i = 0; i < meshLODs.Count; i++)
+                {
+                    var ml = meshLODs[i];
+                    AssetDatabase.AddObjectToAsset(ml.OutputMesh, lodData);
+                }
+                
                 EditorUtility.SetDirty(lodData);
             }
-            meshLODs.ForEach(ml => AssetDatabase.AddObjectToAsset(ml.OutputMesh, lodData));
+            
+            ProcessMeshLODDependencies(meshLODs, preprocessMeshes);
+            
             if (saveAssets)
                 AssetDatabase.SaveAssets();
-
-            ProcessMeshLODDependencies(meshLODs, preprocessMeshes);
         }
-        
+
         /// <summary>
         /// Processes dependencies for the mesh LODs.
         /// </summary>

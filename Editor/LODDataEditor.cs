@@ -12,6 +12,7 @@ namespace Unity.AutoLOD
         public static int initialLODMaxPolyCount { set; get; }
         public static string meshSimplifier;
         public static string batcher;
+        public static LODHierarchyType hierarchyType;
 
         SerializedProperty m_OverrideDefaults;
         SerializedProperty m_ImportSettings;
@@ -42,6 +43,7 @@ namespace Unity.AutoLOD
                 m_ImportSettings.FindPropertyRelative("batcher").stringValue = batcher;
                 m_ImportSettings.FindPropertyRelative("maxLODGenerated").intValue = maxLODGenerated;
                 m_ImportSettings.FindPropertyRelative("initialLODMaxPolyCount").intValue = initialLODMaxPolyCount;
+                m_ImportSettings.FindPropertyRelative("hierarchyType").enumValueIndex = (int)hierarchyType;
             }
 
             if (settingsOverridden)

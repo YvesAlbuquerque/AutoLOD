@@ -40,6 +40,13 @@ namespace Unity.AutoLOD
                 var maxPolyCount = EditorGUILayout.IntField("Initial LOD Max Poly Count", initialLODMaxPolyCountProperty.intValue);
                 if (EditorGUI.EndChangeCheck())
                     initialLODMaxPolyCountProperty.intValue = maxPolyCount;
+                
+                var hierarchyTypeProperty = property.FindPropertyRelative("hierarchyType");
+                EditorGUI.BeginChangeCheck();
+                var hierarchyType = (LODHierarchyType)EditorGUILayout.EnumPopup("Hierarchy Type", (LODHierarchyType)hierarchyTypeProperty.enumValueIndex);
+                if (EditorGUI.EndChangeCheck())
+                    hierarchyTypeProperty.enumValueIndex = (int)hierarchyType;
+                
             }
 
             EditorGUILayout.Space();

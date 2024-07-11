@@ -10,5 +10,6 @@ namespace Unity.AutoLOD
         public string batcher;
         public int maxLODGenerated;
         public int initialLODMaxPolyCount;
+        public LODHierarchyType hierarchyType; 
     }
 }
