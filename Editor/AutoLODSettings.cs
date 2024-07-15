@@ -17,178 +17,8 @@ namespace Unity.AutoLOD
 {
     public class AutoLODSettings
     {
-        static public Type meshSimplifierType
-        {
-            set
-            {
-                if (typeof(IMeshSimplifier).IsAssignableFrom(value))
-                    EditorPrefs.SetString(AutoLODConst.k_DefaultMeshSimplifier, value.AssemblyQualifiedName);
-                else if (value == null)
-                    EditorPrefs.DeleteKey(AutoLODConst.k_DefaultMeshSimplifier);
+        static AutoLODSettingsData autoLODSettingsData => AutoLODSettingsData.Instance;
 
-                UpdateDependencies();
-            }
-            get
-            {
-                var type = Type.GetType(EditorPrefs.GetString(AutoLODConst.k_DefaultMeshSimplifier, AutoLODConst.k_DefaultMeshSimplifierDefault));
-                
-                if (type == null || !typeof(IMeshSimplifier).IsAssignableFrom(type))
-                    type = Type.GetType(AutoLODConst.k_DefaultMeshSimplifierDefault);
-                
-                if (type == null && meshSimplifiers.Count > 0)
-                    type = Type.GetType(meshSimplifiers[0].AssemblyQualifiedName);
-                return type;
-            }
-        }
-        
-        static List<Type> meshSimplifiers
-        {
-            get
-            {
-                if (s_MeshSimplifiers == null || s_MeshSimplifiers.Count == 0)
-                {
-                    s_MeshSimplifiers = ObjectUtils.GetImplementationsOfInterface(typeof(IMeshSimplifier)).ToList();
-                    
-#if ENABLE_INSTALOD
-                    var instaLODSimplifier = Type.GetType("Unity.AutoLOD.InstaLODMeshSimplifier, Assembly-CSharp-Editor");
-                    if (instaLODSimplifier != null)
-                    {
-                        s_MeshSimplifiers.Add(instaLODSimplifier);
-                    }
-#endif
-                }
-
-                return s_MeshSimplifiers;
-            }
-        }
-        
-        static int maxExecutionTime
-        {
-            set
-            {
-                EditorPrefs.SetInt(AutoLODConst.k_MaxExecutionTime, value);
-                UpdateDependencies();
-            }
-            get { return EditorPrefs.GetInt(AutoLODConst.k_MaxExecutionTime, AutoLODConst.k_DefaultMaxExecutionTime); }
-        }
-
-        static Type batcherType
-        {
-            set
-            {
-                if (typeof(IBatcher).IsAssignableFrom(value))
-                    EditorPrefs.SetString(AutoLODConst.k_DefaultBatcher, value.AssemblyQualifiedName);
-                else if (value == null)
-                    EditorPrefs.DeleteKey(AutoLODConst.k_DefaultBatcher);
-
-                UpdateDependencies();
-            }
-            get
-            {
-                var type = Type.GetType(EditorPrefs.GetString(AutoLODConst.k_DefaultBatcher, null));
-                if (type == null && batchers.Count > 0)
-                    type = Type.GetType(batchers[0].AssemblyQualifiedName);
-                return type;
-            }
-        }
-        
-        static bool generateOnImport
-        {
-            set
-            {
-                EditorPrefs.SetBool(AutoLODConst.k_GenerateOnImport, value);
-                UpdateDependencies();
-            }
-            get { return EditorPrefs.GetBool(AutoLODConst.k_GenerateOnImport, false); }
-        }
-
-        static bool saveAssets
-        {
-            get { return EditorPrefs.GetBool(AutoLODConst.k_SaveAssets, true); }
-            set
-            {
-                EditorPrefs.SetBool(AutoLODConst.k_SaveAssets, value);
-                UpdateDependencies();
-            }
-        }
-
-        static int initialLODMaxPolyCount
-        {
-            set
-            {
-                EditorPrefs.SetInt(AutoLODConst.k_InitialLODMaxPolyCount, value);
-                UpdateDependencies();
-            }
-            get { return EditorPrefs.GetInt(AutoLODConst.k_InitialLODMaxPolyCount, AutoLODConst.k_DefaultInitialLODMaxPolyCount); }
-        }
-
-        static bool sceneLODEnabled
-        {
-            set
-            {
-                EditorPrefs.SetBool(AutoLODConst.k_SceneLODEnabled, value);
-                UpdateDependencies();
-            }
-            get { return EditorPrefs.GetBool(AutoLODConst.k_SceneLODEnabled, true); }
-        }
-
-        static bool showVolumeBounds
-        {
-            set
-            {
-                EditorPrefs.SetBool(AutoLODConst.k_ShowVolumeBounds, value);
-                UpdateDependencies();
-            }
-            get { return EditorPrefs.GetBool(AutoLODConst.k_ShowVolumeBounds, false); }
-        }
-        
-        static List<Type> batchers
-        {
-            get
-            {
-                if (s_Batchers == null || s_Batchers.Count == 0)
-                    s_Batchers = ObjectUtils.GetImplementationsOfInterface(typeof(IBatcher)).ToList();
-
-                return s_Batchers;
-            }
-        }
-        
-        static LODHierarchyType hierarchyType
-        {
-            set
-            {
-                EditorPrefs.SetInt(AutoLODConst.k_hierarchyType, (int)value);
-                UpdateDependencies();
-            }
-            get { return (LODHierarchyType)EditorPrefs.GetInt(AutoLODConst.k_hierarchyType, (int)LODHierarchyType.ChildOfSource); }
-        }
-        
-        static public int maxLOD
-        {
-            set
-            {
-                EditorPrefs.SetInt(AutoLODConst.k_MaxLOD, value);
-                UpdateDependencies();
-            }
-            get { return EditorPrefs.GetInt(AutoLODConst.k_MaxLOD, AutoLODConst.k_DefaultMaxLOD); }
-        }
-
-        static public bool useSameMaterialForLODs
-        {
-            get { return EditorPrefs.GetBool(AutoLODConst.k_useSameMaterialForLODs, false); }
-            set
-            {
-                EditorPrefs.SetBool(AutoLODConst.k_useSameMaterialForLODs, value);
-                UpdateDependencies();
-            }
-        }
-        
-        
-        static List<Type> s_Batchers;
-        static List<Type> s_MeshSimplifiers;
-        static IPreferences s_SimplifierPreferences;
-        
-        
         [SettingsProvider]
         static SettingsProvider PreferencesGUI()
         {
@@ -196,6 +26,9 @@ namespace Unity.AutoLOD
             {
                 guiHandler = (searchContext) => DisplayPreferencesGUI(),
             };
+            
+            autoLODSettingsData.OnSettingsUpdated -= UpdateDependencies;
+            autoLODSettingsData.OnSettingsUpdated += UpdateDependencies;
         }
 
         static void DisplayPreferencesGUI()
@@ -223,11 +56,11 @@ namespace Unity.AutoLOD
                 + "threads, however, some generators may require main thread usage for accessing non thread-safe "
                 + "Unity data structures and classes.");
 
-            if (maxExecutionTime == 0)
+            if (autoLODSettingsData.MaxExecutionTime == 0)
             {
                 EditorGUILayout.BeginHorizontal();
                 if (!EditorGUILayout.Toggle(label, true))
-                    maxExecutionTime = 1;
+                    autoLODSettingsData.MaxExecutionTime = 1;
                 GUILayout.Label("Infinity");
                 GUILayout.FlexibleSpace();
                 EditorGUILayout.EndHorizontal();
@@ -235,15 +68,15 @@ namespace Unity.AutoLOD
             else
             {
                 EditorGUI.BeginChangeCheck();
-                var maxTime = EditorGUILayout.IntSlider(label, maxExecutionTime, 0, 15);
+                var maxTime = EditorGUILayout.IntSlider(label, autoLODSettingsData.MaxExecutionTime, 0, 15);
                 if (EditorGUI.EndChangeCheck())
-                    maxExecutionTime = maxTime;
+                    autoLODSettingsData.MaxExecutionTime = maxTime;
             }
         }
 
         static void MeshSimplifierGUI()
         {
-            var type = meshSimplifierType;
+            var type = autoLODSettingsData.MeshSimplifierType;
             if (type != null)
             {
                 var label = new GUIContent("Default Mesh Simplifier", "All simplifiers (IMeshSimplifier) are "
@@ -251,21 +84,21 @@ namespace Unity.AutoLOD
                                                                       + "different approaches can be compared. The default mesh simplifier is used to generate LODs "
                                                                       + "on import and when explicitly called.");
 
-                var displayedOptions = meshSimplifiers.Select(t => t.Name).ToArray();
+                var displayedOptions = autoLODSettingsData.MeshSimplifiers.Select(t => t.Name).ToArray();
                 EditorGUI.BeginChangeCheck();
                 var selected = EditorGUILayout.Popup(label, Array.IndexOf(displayedOptions, type.Name), displayedOptions);
                 if (EditorGUI.EndChangeCheck())
-                    meshSimplifierType = meshSimplifiers[selected];
+                    autoLODSettingsData.MeshSimplifierType = autoLODSettingsData.MeshSimplifiers[selected];
 
-                if (meshSimplifierType != null && typeof(IMeshSimplifier).IsAssignableFrom(meshSimplifierType))
+                if (autoLODSettingsData.MeshSimplifierType != null && typeof(IMeshSimplifier).IsAssignableFrom(autoLODSettingsData.MeshSimplifierType))
                 {
-                    if (s_SimplifierPreferences == null || s_SimplifierPreferences.GetType() != meshSimplifierType)
-                        s_SimplifierPreferences = Activator.CreateInstance(meshSimplifierType) as IPreferences;
+                    if (autoLODSettingsData.SimplifierPreferences == null || autoLODSettingsData.SimplifierPreferences.GetType() != autoLODSettingsData.MeshSimplifierType)
+                        autoLODSettingsData.SimplifierPreferences = Activator.CreateInstance(autoLODSettingsData.MeshSimplifierType) as IPreferences;
 
-                    if (s_SimplifierPreferences != null)
+                    if (autoLODSettingsData.SimplifierPreferences != null)
                     {
                         EditorGUI.indentLevel++;
-                        s_SimplifierPreferences.OnPreferencesGUI();
+                        autoLODSettingsData.SimplifierPreferences.OnPreferencesGUI();
                         EditorGUI.indentLevel--;
                     }
                 }
@@ -278,7 +111,7 @@ namespace Unity.AutoLOD
 
         static void BatcherGUI()
         {
-            var type = batcherType;
+            var type = autoLODSettingsData.BatcherType;
             if (type != null)
             {
                 var label = new GUIContent("Default Batcher", "All simplifiers (IMeshSimplifier) are "
@@ -286,11 +119,11 @@ namespace Unity.AutoLOD
                                                               + "different approaches can be compared. The default batcher is used in HLOD generation when "
                                                               + "combining objects that are located within the same LODVolume.");
 
-                var displayedOptions = batchers.Select(t => t.Name).ToArray();
+                var displayedOptions = autoLODSettingsData.Batchers.Select(t => t.Name).ToArray();
                 EditorGUI.BeginChangeCheck();
                 var selected = EditorGUILayout.Popup(label, Array.IndexOf(displayedOptions, type.Name), displayedOptions);
                 if (EditorGUI.EndChangeCheck())
-                    batcherType = batchers[selected];
+                    autoLODSettingsData.BatcherType = autoLODSettingsData.Batchers[selected];
             }
             else
             {
@@ -304,10 +137,10 @@ namespace Unity.AutoLOD
 
             var maxLODValues = Enumerable.Range(0, LODData.MaxLOD + 1).ToArray();
             EditorGUI.BeginChangeCheck();
-            int maxLODGenerated = EditorGUILayout.IntPopup(label, maxLOD,
+            int maxLODGenerated = EditorGUILayout.IntPopup(label, autoLODSettingsData.MaxLOD,
                 maxLODValues.Select(v => new GUIContent(v.ToString())).ToArray(), maxLODValues);
             if (EditorGUI.EndChangeCheck())
-                maxLOD = maxLODGenerated;
+                autoLODSettingsData.MaxLOD = maxLODGenerated;
         }
 
         static void MaxLOD0PolyCountGUI ()
@@ -317,9 +150,9 @@ namespace Unity.AutoLOD
                                                                      + "for LOD0 allows even the largest of meshes to import with performance-minded defaults.");
 
             EditorGUI.BeginChangeCheck();
-            var maxPolyCount = EditorGUILayout.IntField(label, initialLODMaxPolyCount);
+            var maxPolyCount = EditorGUILayout.IntField(label, autoLODSettingsData.InitialLODMaxPolyCount);
             if (EditorGUI.EndChangeCheck())
-                initialLODMaxPolyCount = maxPolyCount;
+                autoLODSettingsData.InitialLODMaxPolyCount = maxPolyCount;
         }
 
         static void GenerateLODsOnImportGUI()
@@ -329,9 +162,9 @@ namespace Unity.AutoLOD
                                                              + "individually on individual files.");
 
             EditorGUI.BeginChangeCheck();
-            var generateLODsOnImport = EditorGUILayout.Toggle(label, generateOnImport);
+            var generateLODsOnImport = EditorGUILayout.Toggle(label, autoLODSettingsData.GenerateOnImport);
             if (EditorGUI.EndChangeCheck())
-                generateOnImport = generateLODsOnImport;
+                autoLODSettingsData.GenerateOnImport = generateLODsOnImport;
         }
 
         static void SaveAssetsGUI()
@@ -339,18 +172,18 @@ namespace Unity.AutoLOD
             var label = new GUIContent("Save Assets",
                 "This can speed up performance, but may cause errors with some simplifiers");
             EditorGUI.BeginChangeCheck();
-            var saveAssetsOnImport = EditorGUILayout.Toggle(label, saveAssets);
+            var saveAssetsOnImport = EditorGUILayout.Toggle(label, autoLODSettingsData.SaveAssets);
             if (EditorGUI.EndChangeCheck())
-                saveAssets = saveAssetsOnImport;
+                autoLODSettingsData.SaveAssets = saveAssetsOnImport;
         }
 
         static void SameMaterialLODsGUI()
         {
             var label = new GUIContent("Use Same Material for LODs", "If enabled, all LODs will use the same material as LOD0.");
             EditorGUI.BeginChangeCheck();
-            var useSameMaterial = EditorGUILayout.Toggle(label, useSameMaterialForLODs);
+            var useSameMaterial = EditorGUILayout.Toggle(label, autoLODSettingsData.UseSameMaterialForLODs);
             if (EditorGUI.EndChangeCheck())
-                useSameMaterialForLODs = useSameMaterial;
+                autoLODSettingsData.UseSameMaterialForLODs = useSameMaterial;
         }
 
         static void UseSceneLODGUI()
@@ -359,20 +192,20 @@ namespace Unity.AutoLOD
                                                     + "which will automatically generate and stay updated in the background.");
 
             EditorGUI.BeginChangeCheck();
-            var enabled = EditorGUILayout.Toggle(label, sceneLODEnabled);
+            var enabled = EditorGUILayout.Toggle(label, autoLODSettingsData.SceneLODEnabled);
             if (EditorGUI.EndChangeCheck())
-                sceneLODEnabled = enabled;
+                autoLODSettingsData.SceneLODEnabled = enabled;
 
-            if (sceneLODEnabled)
+            if (autoLODSettingsData.SceneLODEnabled)
             {
                 label = new GUIContent("Show Volume Bounds", "This will display the bounds visually of the bounding "
                                                              + "volume hierarchy (currently an Octree)");
 
                 EditorGUI.indentLevel++;
                 EditorGUI.BeginChangeCheck();
-                var showBounds = EditorGUILayout.Toggle(label, showVolumeBounds);
+                var showBounds = EditorGUILayout.Toggle(label, autoLODSettingsData.ShowVolumeBounds);
                 if (EditorGUI.EndChangeCheck())
-                    showVolumeBounds = showBounds;
+                    autoLODSettingsData.ShowVolumeBounds = showBounds;
 
                 var sceneLOD = SceneLOD.instance;
                 EditorGUILayout.HelpBox(string.Format("Coroutine Queue: {0}\nCurrent Execution Time: {1:0.00} s", sceneLOD.coroutineQueueRemaining, sceneLOD.coroutineCurrentExecutionTime * 0.001f), MessageType.None);
@@ -391,44 +224,27 @@ namespace Unity.AutoLOD
             var label = new GUIContent("Default Hierarchy Type", "Controls the hierarchy type used for LODs");
 
             EditorGUI.BeginChangeCheck();
-            LODHierarchyType hierarchy = (LODHierarchyType)EditorGUILayout.EnumPopup(label, hierarchyType);
+            LODHierarchyType hierarchy = (LODHierarchyType)EditorGUILayout.EnumPopup(label, autoLODSettingsData.HierarchyType);
             if (EditorGUI.EndChangeCheck())
-                hierarchyType = hierarchy;
+                autoLODSettingsData.HierarchyType = hierarchy;
         }
+        
         static public void UpdateDependencies()
         {
-            if (meshSimplifierType == null)
-            {
-                MonoBehaviourHelper.StartCoroutine(AutoLOD.GetDefaultSimplifier());
-                ModelImporterLODGenerator.enabled = false;
-                return;
-            }
+            MonoBehaviourHelper.maxSharedExecutionTimeMS = autoLODSettingsData.MaxExecutionTime == 0 ? Mathf.Infinity : autoLODSettingsData.MaxExecutionTime;
 
-            MonoBehaviourHelper.maxSharedExecutionTimeMS = maxExecutionTime == 0 ? Mathf.Infinity : maxExecutionTime;
-
-            LODDataEditor.meshSimplifier = meshSimplifierType.AssemblyQualifiedName;
-            LODDataEditor.batcher = batcherType.AssemblyQualifiedName;
-            LODDataEditor.maxLODGenerated = maxLOD;
-            LODDataEditor.initialLODMaxPolyCount = initialLODMaxPolyCount;
-            LODDataEditor.hierarchyType = hierarchyType;
+            LODDataEditor.meshSimplifier = autoLODSettingsData.MeshSimplifierType.AssemblyQualifiedName;
+            LODDataEditor.batcher = autoLODSettingsData.BatcherType.AssemblyQualifiedName;
+            LODDataEditor.maxLODGenerated = autoLODSettingsData.MaxLOD;
+            LODDataEditor.initialLODMaxPolyCount = autoLODSettingsData.InitialLODMaxPolyCount;
+            LODDataEditor.hierarchyType = autoLODSettingsData.HierarchyType;
             
-            LODVolume.meshSimplifierType = meshSimplifierType;
-            LODVolume.batcherType = batcherType;
-            LODVolume.drawBounds = sceneLODEnabled && showVolumeBounds;
-
-            ModelImporterLODGenerator.saveAssets = saveAssets;
-            ModelImporterLODGenerator.meshSimplifierType = meshSimplifierType;
-            ModelImporterLODGenerator.maxLOD = maxLOD;
-            ModelImporterLODGenerator.enabled = generateOnImport;
-            ModelImporterLODGenerator.initialLODMaxPolyCount = initialLODMaxPolyCount;
-            ModelImporterLODGenerator.hierarchyType = (LODHierarchyType)hierarchyType;
-            
-            if (sceneLODEnabled && !SceneLOD.activated)
+            if (autoLODSettingsData.SceneLODEnabled && !SceneLOD.activated)
             {
                 if (!SceneLOD.instance)
                     Debug.LogError("SceneLOD failed to start");
             }
-            else if (!sceneLODEnabled && SceneLOD.activated)
+            else if (!autoLODSettingsData.SceneLODEnabled && SceneLOD.activated)
             {
                 UnityObject.DestroyImmediate(SceneLOD.instance);
             }

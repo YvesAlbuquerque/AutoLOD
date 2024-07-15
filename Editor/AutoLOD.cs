@@ -20,83 +20,16 @@ namespace Unity.AutoLOD
     [InitializeOnLoad]
     class AutoLOD
     {
+        static AutoLODSettingsData autoLODSettingsData => AutoLODSettingsData.Instance;
+
         static SceneLOD s_SceneLOD;
 
         static AutoLOD()
         {
-            AutoLODSettings.UpdateDependencies();
-        }
-        
-        static public IEnumerator GetDefaultSimplifier()
-        {
-            PackageStatus status = PackageStatus.Unknown;
-            var result = PackageInfo.GetAllRegisteredPackages();
-            foreach (var package in result)
+            if (autoLODSettingsData.MeshSimplifierType == null)
             {
-                if (package.name == "com.whinarn.unitymeshsimplifier")
-                {
-                    status = PackageStatus.Available;
-                    break;
-                }
+                MonoBehaviourHelper.StartCoroutine(AutoLODSettingsData.GetDefaultSimplifier());
             }
-
-            if (status != PackageStatus.Available
-                && EditorUtility.DisplayDialog("Install Default Mesh Simplifier?",
-                    "You are missing a default mesh simplifier. Would you like to install one?",
-                    "Yes", "No"))
-            {
-                var request = Client.Add("https://github.com/Whinarn/UnityMeshSimplifier.git");
-                while (!request.IsCompleted)
-                    yield return null;
-
-                switch (request.Status)
-                {
-                    case StatusCode.Success:
-                        status = PackageStatus.Available;
-                        break;
-                    case StatusCode.InProgress:
-                        status = PackageStatus.InProgress;
-                        break;
-                    case StatusCode.Failure:
-                        Debug.LogError($"AutoLOD: {request.Error.message}");
-                        break;
-                }
-            }
-
-            if (status == PackageStatus.Available)
-            {
-                // Cribbed from ConditionalCompilationUtility
-                // TODO: Remove when minimum version is 2019 LTS and use define constraints instead
-                var buildTargetGroup = EditorUserBuildSettings.selectedBuildTargetGroup;
-
-                NamedBuildTarget namedBuildTarget = NamedBuildTarget.FromBuildTargetGroup(buildTargetGroup);
-                string previousProjectDefines = PlayerSettings.GetScriptingDefineSymbols(namedBuildTarget);
-
-                var projectDefines = previousProjectDefines.Split(';').ToList();
-                if (!projectDefines.Contains(AutoLODConst.k_DefaultMeshSimplifierDefine, StringComparer.OrdinalIgnoreCase))
-                {
-                    EditorApplication.LockReloadAssemblies();
-
-                    try
-                    {
-                        projectDefines.Add(AutoLODConst.k_DefaultMeshSimplifierDefine);
-
-                        // This will trigger another re-compile, which needs to happen, so all the custom attributes will be visible
-                        PlayerSettings.SetScriptingDefineSymbols(namedBuildTarget, string.Join(";", projectDefines.ToArray()));
-                        
-                        // Let other systems execute before reloading assemblies
-                        yield return null;
-                    }
-                    finally
-                    {
-                        EditorApplication.UnlockReloadAssemblies();
-                    }
-                }
-            }
-            else if (status != PackageStatus.InProgress)
-            {
-                Debug.LogError("AutoLOD: You must set a valid Default Mesh Simplifier under Edit -> Preferences");
-            }            
         }
         
         #region GenerateLOD
@@ -113,7 +46,7 @@ namespace Unity.AutoLOD
                 if (!lodGroup)
                     lodGroup = go.AddComponent<LODGroup>();
 
-                var lods = new LOD[AutoLODSettings.maxLOD + 1];
+                var lods = new LOD[autoLODSettingsData.MaxLOD + 1];
                 var lod0 = lods[0];
                 lod0.renderers = go.GetComponentsInChildren<MeshRenderer>();
                 lod0.screenRelativeTransitionHeight = 0.5f;
@@ -121,7 +54,7 @@ namespace Unity.AutoLOD
 
                 var meshes = new List<Mesh>();
 
-                for (int l = 1; l <= AutoLODSettings.maxLOD; l++)
+                for (int l = 1; l <= autoLODSettingsData.MaxLOD; l++)
                 {
                     var lodRenderers = new List<MeshRenderer>();
                     foreach (var mf in meshFilters)
@@ -146,7 +79,7 @@ namespace Unity.AutoLOD
                         EditorUtility.CopySerialized(mf, lodMF);
                         EditorUtility.CopySerialized(mf.GetComponent<MeshRenderer>(), lodRenderer);
 
-                        if (AutoLODSettings.useSameMaterialForLODs)
+                        if (autoLODSettingsData.UseSameMaterialForLODs)
                         {
                             lodRenderer.sharedMaterials = mf.GetComponent<MeshRenderer>().sharedMaterials;
                         }
@@ -157,7 +90,7 @@ namespace Unity.AutoLOD
                         lodMF.sharedMesh = simplifiedMesh;
                         meshes.Add(simplifiedMesh);
 
-                        var meshLOD = MeshLOD.GetGenericInstance(AutoLODSettings.meshSimplifierType);
+                        var meshLOD = MeshLOD.GetGenericInstance(autoLODSettingsData.MeshSimplifierType);
                         meshLOD.InputMesh = sharedMesh;
                         meshLOD.OutputMesh = simplifiedMesh;
                         meshLOD.Quality = Mathf.Pow(0.5f, l);
@@ -166,7 +99,7 @@ namespace Unity.AutoLOD
 
                     var lod = lods[l];
                     lod.renderers = lodRenderers.ToArray();
-                    lod.screenRelativeTransitionHeight = l == AutoLODSettings.maxLOD ? 0.01f : Mathf.Pow(0.5f, l + 1);
+                    lod.screenRelativeTransitionHeight = l == autoLODSettingsData.MaxLOD ? 0.01f : Mathf.Pow(0.5f, l + 1);
                     lods[l] = lod;
                 }
 
@@ -198,7 +131,7 @@ namespace Unity.AutoLOD
                 {
                     var assetPath = AssetDatabase.GetAssetPath(selection);
 
-                    if (!ModelImporterLODGenerator.enabled)
+                    if (!autoLODSettingsData.GenerateOnImport)
                     {
                         // If AutoLOD's generate on import is disabled for the whole project, then generate LODs for this model specifically
                         var lodData = ModelImporterLODGenerator.GetLODData(assetPath);
@@ -476,13 +409,5 @@ namespace Unity.AutoLOD
         }
         #endregion
 
-    }
-    
-    enum PackageStatus
-    {
-        Unknown,
-        Available,
-        InProgress,
-        Failure
     }
 }

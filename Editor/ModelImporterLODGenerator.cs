@@ -15,13 +15,8 @@ namespace Unity.AutoLOD
     /// </summary>
     public class ModelImporterLODGenerator : AssetPostprocessor
     {
-        public static bool saveAssets { set; get; }
-        public static bool enabled { set; get; }
-        public static Type meshSimplifierType { set; get; }
-        public static int maxLOD { set; get; }
-        public static int initialLODMaxPolyCount { set; get; }
-        public static LODHierarchyType hierarchyType { set; get; }
-
+        static AutoLODSettingsData autoLODSettingsData => AutoLODSettingsData.Instance;
+        
         const HideFlags k_DefaultHideFlags = HideFlags.None;
 
         static List<string> s_ModelAssetsProcessed = new List<string>();
@@ -107,7 +102,7 @@ namespace Unity.AutoLOD
         /// <returns>True if the model should be processed; otherwise, false.</returns>
         bool ShouldProcessModel(GameObject go)
         {
-            return !go.GetComponentInChildren<LODGroup>() && meshSimplifierType != null && IsEditable(assetPath);
+            return !go.GetComponentInChildren<LODGroup>() && autoLODSettingsData.MeshSimplifierType != null && IsEditable(assetPath);
         }
 
         /// <summary>
@@ -179,7 +174,7 @@ namespace Unity.AutoLOD
         /// <param name="preprocessMeshes">The set of meshes to preprocess.</param>
         void ProcessInitialLOD(MeshFilter[] originalMeshFilters, LODImportSettings importSettings, uint polyCount, List<IMeshLOD> meshLODs, HashSet<int> preprocessMeshes)
         {
-            var simplifierType = Type.GetType(importSettings.meshSimplifier) ?? meshSimplifierType;
+            var simplifierType = Type.GetType(importSettings.meshSimplifier) ?? autoLODSettingsData.MeshSimplifierType;
             foreach (var mf in originalMeshFilters)
             {
                 var inputMesh = mf.sharedMesh;
@@ -232,7 +227,7 @@ namespace Unity.AutoLOD
             
             for (int i = 1; i <= importSettings.maxLODGenerated; i++)
             {
-                
+                lodMeshes.Clear();
                 foreach (var mf in originalMeshFilters)
                 {
                     var inputMesh = mf.sharedMesh;
@@ -254,7 +249,7 @@ namespace Unity.AutoLOD
 
                     CopyRendererSettings(mf, lodRenderer);
 
-                    var meshLOD = MeshLOD.GetGenericInstance(meshSimplifierType);
+                    var meshLOD = MeshLOD.GetGenericInstance(autoLODSettingsData.MeshSimplifierType);
                     meshLOD.InputMesh = inputMesh;
                     meshLOD.OutputMesh = outputMesh;
                     meshLOD.Quality = Mathf.Pow(0.5f, i);
@@ -327,7 +322,7 @@ namespace Unity.AutoLOD
             
             ProcessMeshLODDependencies(meshLODs, preprocessMeshes);
             
-            if (saveAssets)
+            if (autoLODSettingsData.SaveAssets)
                 AssetDatabase.SaveAssets();
         }
 
@@ -400,12 +395,11 @@ namespace Unity.AutoLOD
         /// <returns>The created LOD transform.</returns>
         Transform CreateLODTransformForCustomLODs(GameObject go, Renderer r, int lodIndex)
         {
-            var lodTransform = EditorUtility.CreateGameObjectWithHideFlags(r.name, k_DefaultHideFlags, typeof(MeshFilter), typeof(MeshRenderer)).transform;
+            var lodTransform = EditorUtility.CreateGameObjectWithHideFlags(r.name, k_DefaultHideFlags).transform;
+            var lodMF = lodTransform.gameObject.AddComponent<MeshFilter>();
+            var lodRenderer = lodTransform.gameObject.AddComponent<MeshRenderer>();
             lodTransform.parent = go.transform;
             lodTransform.localPosition = Vector3.zero;
-
-            var lodMF = lodTransform.GetComponent<MeshFilter>();
-            var lodRenderer = lodTransform.GetComponent<MeshRenderer>();
 
             EditorUtility.CopySerialized(r.GetComponent<MeshFilter>(), lodMF);
             EditorUtility.CopySerialized(r, lodRenderer);
@@ -533,9 +527,10 @@ namespace Unity.AutoLOD
                 }
             }
 
-            if (assetsImported && saveAssets)
+            if (assetsImported && autoLODSettingsData.SaveAssets)
                 AssetDatabase.SaveAssets();
         }
+        
 
         #region Aux Methods
         /// <summary>
@@ -567,10 +562,11 @@ namespace Unity.AutoLOD
 
             if (!overrideDefaults)
             {
-                importSettings.generateOnImport = enabled;
-                importSettings.meshSimplifier = meshSimplifierType.AssemblyQualifiedName;
-                importSettings.maxLODGenerated = maxLOD;
-                importSettings.initialLODMaxPolyCount = initialLODMaxPolyCount;
+                importSettings.generateOnImport = autoLODSettingsData.GenerateOnImport;
+                importSettings.meshSimplifier = autoLODSettingsData.MeshSimplifierType.AssemblyQualifiedName;
+                importSettings.maxLODGenerated = autoLODSettingsData.MaxLOD;
+                importSettings.initialLODMaxPolyCount = autoLODSettingsData.InitialLODMaxPolyCount;
+                importSettings.hierarchyType = autoLODSettingsData.HierarchyType;
             }
 
             return lodData;
@@ -597,5 +593,6 @@ namespace Unity.AutoLOD
                 r.name = string.Format("{0}_LOD{1}", r.name, lod);
         }
         #endregion
+
     }
 }

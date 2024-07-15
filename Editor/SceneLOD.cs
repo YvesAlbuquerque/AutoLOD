@@ -502,7 +502,7 @@ namespace Unity.AutoLOD
                     // Disable all children LODGroups if an HLOD LODGroup could replace it
                     foreach (var r in cached)
                     {
-                        var childLODGroup = r as LODVolume.LODGroupHelper;
+                        var childLODGroup = r as LODGroupHelper;
 
                         if (childLODGroup != null && childLODGroup.GetCurrentLOD(camera, cameraPosition) != childLODGroup.GetMaxLOD())
                         {
@@ -513,7 +513,7 @@ namespace Unity.AutoLOD
 
                     foreach (var r in cached)
                     {
-                        var childLODGroup = r as LODVolume.LODGroupHelper;
+                        var childLODGroup = r as LODGroupHelper;
 
                         if (childLODGroup != null)
                             childLODGroup.SetEnabled(!allChildrenUsingCoarsestLOD);

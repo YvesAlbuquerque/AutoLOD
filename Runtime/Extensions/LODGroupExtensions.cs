@@ -19,7 +19,7 @@ namespace Unity.AutoLOD
             SetRenderersEnabled(lods, enabled);
         }
 
-        public static void SetEnabled(this LODVolume.LODGroupHelper lodGroupHelper, bool enabled)
+        public static void SetEnabled(this LODGroupHelper lodGroupHelper, bool enabled)
         {
             var lodGroup = lodGroupHelper.lodGroup;
             if (lodGroup == null || lodGroup.enabled != enabled)
@@ -60,12 +60,12 @@ namespace Unity.AutoLOD
             return lodIndex;
         }
 
-        public static int GetMaxLOD(this LODVolume.LODGroupHelper lodGroupHelper)
+        public static int GetMaxLOD(this LODGroupHelper lodGroupHelper)
         {
             return lodGroupHelper.maxLOD;
         }
 
-        public static int GetCurrentLOD(this LODVolume.LODGroupHelper lodGroupHelper, Camera camera = null, Vector3? cameraPosition = null)
+        public static int GetCurrentLOD(this LODGroupHelper lodGroupHelper, Camera camera = null, Vector3? cameraPosition = null)
         {
             var lods = lodGroupHelper.lods;
             camera = camera ?? Camera.current;
@@ -122,7 +122,7 @@ namespace Unity.AutoLOD
             return DistanceToRelativeHeight(camera, distance, lodGroup.GetWorldSpaceSize());
         }
 
-        static float GetRelativeHeight(this LODVolume.LODGroupHelper lodGroupHelper, Camera camera, Vector3 cameraPosition)
+        static float GetRelativeHeight(this LODGroupHelper lodGroupHelper, Camera camera, Vector3 cameraPosition)
         {
             var distance = (lodGroupHelper.referencePoint - cameraPosition).magnitude;
             return DistanceToRelativeHeight(camera, distance, lodGroupHelper.worldSpaceSize);
