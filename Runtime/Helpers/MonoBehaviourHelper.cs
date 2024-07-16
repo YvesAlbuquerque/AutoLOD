@@ -42,6 +42,7 @@ namespace Unity.AutoLOD
         partial class Surrogate : MonoBehaviour { }
 
         Surrogate m_MonoBehaviour;
+        static AutoLODSettingsData autoLODSettingsData => AutoLODSettingsData.Instance;
 
         MonoBehaviour monoBehaviour
         {
@@ -64,7 +65,15 @@ namespace Unity.AutoLOD
             }
         }
 
-        public static float? maxSharedExecutionTimeMS { get; set; }
+        public static float? maxSharedExecutionTimeMS 
+        {
+            get
+            {
+                return autoLODSettingsData.MaxExecutionTime == 0
+                    ? Mathf.Infinity
+                    : autoLODSettingsData.MaxExecutionTime;
+            }
+        }
 
         List<TimedEnumerator> m_Coroutines = new List<TimedEnumerator>();
         readonly Queue<Action> m_MainThreadActionQueue = new Queue<Action>();
@@ -203,7 +212,7 @@ namespace Unity.AutoLOD
             [ContextMenu("MaxTimeTest")]
             void MaxTimeTest()
             {
-                maxSharedExecutionTimeMS = 1f;
+                //maxSharedExecutionTimeMS = 1f;
 
                 //((MonoBehaviour)instance).StartCoroutine(ContinuallyFindObjects());
                 //StartCoroutine(ContinuallyFindObjects());
