@@ -243,14 +243,6 @@ namespace Unity.AutoLOD
         
         static public void UpdateDependencies()
         {
-            MonoBehaviourHelper.maxSharedExecutionTimeMS = autoLODSettingsData.MaxExecutionTime == 0 ? Mathf.Infinity : autoLODSettingsData.MaxExecutionTime;
-
-            LODDataEditor.meshSimplifier = autoLODSettingsData.MeshSimplifierType.AssemblyQualifiedName;
-            LODDataEditor.batcher = autoLODSettingsData.BatcherType.AssemblyQualifiedName;
-            LODDataEditor.maxLODGenerated = autoLODSettingsData.MaxLOD;
-            LODDataEditor.initialLODMaxPolyCount = autoLODSettingsData.InitialLODMaxPolyCount;
-            LODDataEditor.hierarchyType = autoLODSettingsData.HierarchyType;
-            
             if (autoLODSettingsData.SceneLODEnabled && !SceneLOD.activated)
             {
                 if (!SceneLOD.instance)

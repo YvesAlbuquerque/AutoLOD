@@ -8,12 +8,8 @@ namespace Unity.AutoLOD
     [CanEditMultipleObjects]
     public class LODDataEditor : Editor
     {
-        public static int maxLODGenerated { set; get; }
-        public static int initialLODMaxPolyCount { set; get; }
-        public static string meshSimplifier;
-        public static string batcher;
-        public static LODHierarchyType hierarchyType;
-
+        static AutoLODSettingsData autoLODSettingsData => AutoLODSettingsData.Instance;
+        
         SerializedProperty m_OverrideDefaults;
         SerializedProperty m_ImportSettings;
         SerializedProperty[] m_LODs = new SerializedProperty[LODData.MaxLOD + 1];
@@ -39,11 +35,12 @@ namespace Unity.AutoLOD
             if (EditorGUI.EndChangeCheck() && m_OverrideDefaults.boolValue)
             {
                 m_ImportSettings.FindPropertyRelative("generateOnImport").boolValue = true;
-                m_ImportSettings.FindPropertyRelative("meshSimplifier").stringValue = meshSimplifier;
-                m_ImportSettings.FindPropertyRelative("batcher").stringValue = batcher;
-                m_ImportSettings.FindPropertyRelative("maxLODGenerated").intValue = maxLODGenerated;
-                m_ImportSettings.FindPropertyRelative("initialLODMaxPolyCount").intValue = initialLODMaxPolyCount;
-                m_ImportSettings.FindPropertyRelative("hierarchyType").enumValueIndex = (int)hierarchyType;
+                m_ImportSettings.FindPropertyRelative("meshSimplifier").stringValue = autoLODSettingsData.BatcherType.AssemblyQualifiedName;
+                m_ImportSettings.FindPropertyRelative("batcher").stringValue = autoLODSettingsData.BatcherType.AssemblyQualifiedName;
+                m_ImportSettings.FindPropertyRelative("maxLODGenerated").intValue = autoLODSettingsData.MaxLOD;
+                m_ImportSettings.FindPropertyRelative("initialLODMaxPolyCount").intValue = autoLODSettingsData.InitialLODMaxPolyCount;
+                m_ImportSettings.FindPropertyRelative("hierarchyType").enumValueIndex = (int)autoLODSettingsData.HierarchyType;
+                m_ImportSettings.FindPropertyRelative("parentName").stringValue = autoLODSettingsData.ParentName;
             }
 
             if (settingsOverridden)
