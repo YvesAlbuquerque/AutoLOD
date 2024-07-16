@@ -375,6 +375,16 @@ namespace Unity.AutoLOD
             get => simplifierPreferences;
             set => simplifierPreferences = value;
         }
+        
+        public string ParentName
+        {
+            get => lodImportSettings.parentName;
+            set
+            {
+                lodImportSettings.parentName = value;
+                OnSettingsUpdated?.Invoke();
+            }
+        }
 
         private void OnValidate()
         {

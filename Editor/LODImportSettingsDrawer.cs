@@ -47,6 +47,12 @@ namespace Unity.AutoLOD
                 if (EditorGUI.EndChangeCheck())
                     hierarchyTypeProperty.enumValueIndex = (int)hierarchyType;
                 
+                var rootNameProperty = property.FindPropertyRelative("parentName");
+                EditorGUI.BeginChangeCheck();
+                var rootName = EditorGUILayout.TextField("Parent Name", rootNameProperty.stringValue);
+                if (EditorGUI.EndChangeCheck())
+                    rootNameProperty.stringValue = rootName;
+                
             }
 
             EditorGUILayout.Space();

@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine.Serialization;
 
 namespace Unity.AutoLOD
 {
@@ -10,6 +11,7 @@ namespace Unity.AutoLOD
         public string batcher = "UnityDefaultBatcher";
         public int maxLODGenerated = 3;
         public int initialLODMaxPolyCount = Int32.MaxValue;
-        public LODHierarchyType hierarchyType = LODHierarchyType.ChildOfSource; 
+        public LODHierarchyType hierarchyType = LODHierarchyType.ChildOfSource;
+        public string parentName = String.Empty;
     }
 }

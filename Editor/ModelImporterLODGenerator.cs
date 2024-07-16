@@ -219,11 +219,14 @@ namespace Unity.AutoLOD
         /// <param name="meshLODs">The list to store the generated mesh LODs.</param>
         void GenerateLODs(GameObject go, MeshFilter[] originalMeshFilters, LODImportSettings importSettings, LODData lodData, List<IMeshLOD> meshLODs)
         {
+            bool generateParent = !String.IsNullOrEmpty(importSettings.parentName);
             var lodMeshes = new List<Renderer>();
-            var newGo = new GameObject("Y");
-            newGo.transform.localPosition = Vector3.zero;
-            newGo.transform.localRotation = Quaternion.identity;
-            newGo.transform.localScale = Vector3.one;
+            GameObject parentObject = null;
+            
+            if (generateParent)
+            {
+                parentObject = new GameObject(importSettings.parentName);
+            }
             
             for (int i = 1; i <= importSettings.maxLODGenerated; i++)
             {
@@ -231,9 +234,39 @@ namespace Unity.AutoLOD
                 foreach (var mf in originalMeshFilters)
                 {
                     var inputMesh = mf.sharedMesh;
-                    newGo.transform.parent = mf.transform;
 
-                    var lodTransform = CreateLODTransform(newGo, mf, i);
+                    if (generateParent)
+                    {
+                        Transform parentOfParent;
+                        if (importSettings.hierarchyType == LODHierarchyType.ChildOfSource)
+                        {
+                            parentOfParent = mf.transform;
+                            parentObject.transform.localPosition = Vector3.zero;
+                            parentObject.transform.localRotation = Quaternion.identity;
+                            parentObject.transform.localScale = Vector3.one;
+                            parentObject.transform.SetParent(parentOfParent);
+                        }
+                        else
+                        {
+                            parentOfParent = mf.transform.parent;
+                            mf.transform.SetParent(parentObject.transform);
+                            parentObject.transform.SetParent(parentOfParent);
+                        }
+                    }
+                    else
+                    {
+                        if (importSettings.hierarchyType == LODHierarchyType.ChildOfSource)
+                        {
+                            parentObject = mf.gameObject;
+                        }
+                        else
+                        {
+                            parentObject = mf.transform.parent.gameObject;
+                        }
+                    }
+
+
+                    var lodTransform = CreateLODTransform(parentObject, mf, i, importSettings.hierarchyType == LODHierarchyType.ChildOfSource);
                     var lodMF = lodTransform.GetComponent<MeshFilter>();
                     var lodRenderer = lodTransform.GetComponent<MeshRenderer>();
 
@@ -266,13 +299,23 @@ namespace Unity.AutoLOD
         /// <param name="mf">The original MeshFilter.</param>
         /// <param name="lodIndex">The LOD index.</param>
         /// <returns>The created LOD transform.</returns>
-        Transform CreateLODTransform(GameObject newGo, MeshFilter mf, int lodIndex)
+        Transform CreateLODTransform(GameObject newGo, MeshFilter mf, int lodIndex, bool resetChildTransform = true)
         {
             var lodTransform = EditorUtility.CreateGameObjectWithHideFlags(mf.name, k_DefaultHideFlags, typeof(MeshFilter), typeof(MeshRenderer)).transform;
             lodTransform.parent = newGo.transform;
-            lodTransform.localPosition = Vector3.zero;
-            lodTransform.localRotation = Quaternion.identity;
-            lodTransform.localScale = Vector3.one;
+            if (resetChildTransform)
+            {
+                lodTransform.localPosition = Vector3.zero;
+                lodTransform.localRotation = Quaternion.identity;
+                lodTransform.localScale = Vector3.one;
+            }
+            else
+            {
+                lodTransform.position = mf.transform.position;
+                lodTransform.rotation = mf.transform.rotation;
+                lodTransform.localScale = mf.transform.localScale;
+            }
+
             AppendLODNameToRenderer(lodTransform.GetComponent<Renderer>(), lodIndex);
             return lodTransform;
         }
@@ -300,7 +343,6 @@ namespace Unity.AutoLOD
             {
                 var lodDataPath = GetLODDataPath(assetPath);
                 AssetDatabase.CreateAsset(lodData, lodDataPath);
-                AssetDatabase.SaveAssets();
             }
             else
             {
@@ -567,6 +609,7 @@ namespace Unity.AutoLOD
                 importSettings.maxLODGenerated = autoLODSettingsData.MaxLOD;
                 importSettings.initialLODMaxPolyCount = autoLODSettingsData.InitialLODMaxPolyCount;
                 importSettings.hierarchyType = autoLODSettingsData.HierarchyType;
+                importSettings.parentName = autoLODSettingsData.ParentName;
             }
 
             return lodData;

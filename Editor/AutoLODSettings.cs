@@ -45,8 +45,10 @@ namespace Unity.AutoLOD
             SameMaterialLODsGUI();
             UseSceneLODGUI();
             HierarchyTypeGUI();
+            ParentNameGUI();
             EditorGUILayout.EndVertical();
         }
+
 
         static void MaxExecutionTimeGUI()
         {
@@ -227,6 +229,16 @@ namespace Unity.AutoLOD
             LODHierarchyType hierarchy = (LODHierarchyType)EditorGUILayout.EnumPopup(label, autoLODSettingsData.HierarchyType);
             if (EditorGUI.EndChangeCheck())
                 autoLODSettingsData.HierarchyType = hierarchy;
+        }
+        
+        static void ParentNameGUI ()
+        {
+            var label = new GUIContent("Root Name", "Controls the root name used for LODs. Empty creates no root.");
+
+            EditorGUI.BeginChangeCheck();
+            string rootName = EditorGUILayout.TextField(label, autoLODSettingsData.ParentName);
+            if (EditorGUI.EndChangeCheck())
+                autoLODSettingsData.ParentName = rootName;
         }
         
         static public void UpdateDependencies()
