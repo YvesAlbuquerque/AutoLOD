@@ -35,7 +35,7 @@ namespace Unity.AutoLOD
             if (EditorGUI.EndChangeCheck() && m_OverrideDefaults.boolValue)
             {
                 m_ImportSettings.FindPropertyRelative("generateOnImport").boolValue = true;
-                m_ImportSettings.FindPropertyRelative("meshSimplifier").stringValue = autoLODSettingsData.BatcherType.AssemblyQualifiedName;
+                m_ImportSettings.FindPropertyRelative("meshSimplifier").stringValue = autoLODSettingsData.MeshSimplifierType.AssemblyQualifiedName;
                 m_ImportSettings.FindPropertyRelative("batcher").stringValue = autoLODSettingsData.BatcherType.AssemblyQualifiedName;
                 m_ImportSettings.FindPropertyRelative("maxLODGenerated").intValue = autoLODSettingsData.MaxLOD;
                 m_ImportSettings.FindPropertyRelative("initialLODMaxPolyCount").intValue = autoLODSettingsData.InitialLODMaxPolyCount;
