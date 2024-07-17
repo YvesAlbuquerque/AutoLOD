@@ -1,16 +1,7 @@
 using UnityEngine;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Reflection;
-using Unity.AutoLOD.Utilities;
 using UnityEditor;
-using UnityEditor.Build;
-using UnityEditor.PackageManager;
-using UnityEngine;
-using PackageInfo = UnityEditor.PackageManager.PackageInfo;
 using UnityObject = UnityEngine.Object;
 
 namespace Unity.AutoLOD
@@ -22,13 +13,13 @@ namespace Unity.AutoLOD
         [SettingsProvider]
         static SettingsProvider PreferencesGUI()
         {
+            autoLODSettingsData.OnSettingsUpdated -= UpdateDependencies;
+            autoLODSettingsData.OnSettingsUpdated += UpdateDependencies;
+            
             return new SettingsProvider("Preferences/AutoLOD", SettingsScope.User)
             {
                 guiHandler = (searchContext) => DisplayPreferencesGUI(),
             };
-            
-            autoLODSettingsData.OnSettingsUpdated -= UpdateDependencies;
-            autoLODSettingsData.OnSettingsUpdated += UpdateDependencies;
         }
 
         static void DisplayPreferencesGUI()
@@ -233,7 +224,7 @@ namespace Unity.AutoLOD
         
         static void ParentNameGUI ()
         {
-            var label = new GUIContent("Root Name", "Controls the root name used for LODs. Empty creates no root.");
+            var label = new GUIContent("Parent Name", "Controls the root name used for LODs. Empty creates no root.");
 
             EditorGUI.BeginChangeCheck();
             string rootName = EditorGUILayout.TextField(label, autoLODSettingsData.ParentName);
