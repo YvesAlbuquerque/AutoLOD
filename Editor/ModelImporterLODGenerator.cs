@@ -70,7 +70,7 @@ namespace Unity.AutoLOD
                 ClearPreviousLODData(lodData);
 
                 // Set LOD 0 to the original renderers.
-                lodData[0] = originalMeshFilters.Select(mf => mf.GetComponent<Renderer>()).ToArray();
+                lodData[0] = originalMeshFilters.Select(meshFilter => meshFilter.GetComponent<Renderer>()).ToArray();
 
                 // Generate LOD meshes and add them to the LOD data.
                 GenerateLODs(go, originalMeshFilters, importSettings, lodData, meshLODs);
@@ -231,16 +231,16 @@ namespace Unity.AutoLOD
             for (int i = 1; i <= importSettings.maxLODGenerated; i++)
             {
                 lodMeshes.Clear();
-                foreach (var mf in originalMeshFilters)
+                foreach (var meshFilter in originalMeshFilters)
                 {
-                    var inputMesh = mf.sharedMesh;
+                    var inputMesh = meshFilter.sharedMesh;
 
                     if (generateParent)
                     {
                         Transform parentOfParent;
                         if (importSettings.hierarchyType == LODHierarchyType.ChildOfSource)
                         {
-                            parentOfParent = mf.transform;
+                            parentOfParent = meshFilter.transform;
                             parentObject.transform.localPosition = Vector3.zero;
                             parentObject.transform.localRotation = Quaternion.identity;
                             parentObject.transform.localScale = Vector3.one;
@@ -248,8 +248,8 @@ namespace Unity.AutoLOD
                         }
                         else
                         {
-                            parentOfParent = mf.transform.parent;
-                            mf.transform.SetParent(parentObject.transform);
+                            parentOfParent = meshFilter.transform.parent;
+                            meshFilter.transform.SetParent(parentObject.transform);
                             parentObject.transform.SetParent(parentOfParent);
                         }
                     }
@@ -257,30 +257,28 @@ namespace Unity.AutoLOD
                     {
                         if (importSettings.hierarchyType == LODHierarchyType.ChildOfSource)
                         {
-                            parentObject = mf.gameObject;
+                            parentObject = meshFilter.gameObject;
                         }
                         else
                         {
-                            parentObject = mf.transform.parent.gameObject;
+                            parentObject = meshFilter.transform.parent.gameObject;
                         }
                     }
 
 
-                    var lodTransform = CreateLODTransform(parentObject, mf, i, importSettings.hierarchyType == LODHierarchyType.ChildOfSource);
-                    var lodMF = lodTransform.GetComponent<MeshFilter>();
+                    var lodTransform = CreateLODTransform(parentObject, meshFilter, i, importSettings.hierarchyType == LODHierarchyType.ChildOfSource);
+                    var lodMeshFilter = lodTransform.GetComponent<MeshFilter>();
                     var lodRenderer = lodTransform.GetComponent<MeshRenderer>();
 
-                    var outputMesh = new Mesh
-                    {
-                        indexFormat = UnityEngine.Rendering.IndexFormat.UInt32,
-                        name = $"{inputMesh.name} LOD{i}",
-                        bounds = inputMesh.bounds
-                    };
-                    lodMF.sharedMesh = outputMesh;
+                    var outputMesh = new Mesh();
+                    outputMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+                    outputMesh.name = string.Format("{0} LOD{1}", inputMesh.name, i);
+                    outputMesh.bounds = inputMesh.bounds;
+                    lodMeshFilter.sharedMesh = outputMesh;
 
                     lodMeshes.Add(lodRenderer);
 
-                    CopyRendererSettings(mf, lodRenderer);
+                    CopyRendererSettings(meshFilter, lodRenderer);
 
                     var meshLOD = MeshLOD.GetGenericInstance(autoLODSettingsData.MeshSimplifierType);
                     meshLOD.InputMesh = inputMesh;
@@ -323,11 +321,11 @@ namespace Unity.AutoLOD
         /// <summary>
         /// Copies the settings from one renderer to another.
         /// </summary>
-        /// <param name="mf">The source MeshFilter.</param>
+        /// <param name="meshFilter">The source MeshFilter.</param>
         /// <param name="lodRenderer">The destination MeshRenderer.</param>
-        void CopyRendererSettings(MeshFilter mf, MeshRenderer lodRenderer)
+        void CopyRendererSettings(MeshFilter meshFilter, MeshRenderer lodRenderer)
         {
-            EditorUtility.CopySerialized(mf.GetComponent<MeshRenderer>(), lodRenderer);
+            EditorUtility.CopySerialized(meshFilter.GetComponent<MeshRenderer>(), lodRenderer);
         }
 
         /// <summary>
@@ -369,7 +367,7 @@ namespace Unity.AutoLOD
         }
 
         /// <summary>
-        /// Processes dependencies for the mesh LODs.
+        /// Processes dependencies for the mesh LODs. If a mesh is in the preprocessMeshes set, it will generate in a separate job.
         /// </summary>
         /// <param name="meshLODs">The list of mesh LODs.</param>
         /// <param name="preprocessMeshes">The set of meshes to preprocess.</param>
@@ -378,26 +376,26 @@ namespace Unity.AutoLOD
             if (preprocessMeshes.Count > 0)
             {
                 var jobDependencies = new List<JobHandle>();
-                meshLODs.RemoveAll(ml =>
+                meshLODs.RemoveAll(meshLOD =>
                 {
-                    if (preprocessMeshes.Contains(ml.OutputMesh.GetInstanceID()))
+                    if (preprocessMeshes.Contains(meshLOD.OutputMesh.GetInstanceID()))
                     {
-                        jobDependencies.Add(ml.Generate());
+                        jobDependencies.Add(meshLOD.Generate());
                         return true;
                     }
                     return false;
                 });
 
-                foreach (var ml in meshLODs)
+                foreach (var meshLOD in meshLODs)
                 {
-                    MonoBehaviourHelper.StartCoroutine(ml.GenerateAfterDependencies(jobDependencies));
+                    MonoBehaviourHelper.StartCoroutine(meshLOD.GenerateAfterDependencies(jobDependencies));
                 }
             }
             else
             {
-                foreach (var ml in meshLODs)
+                foreach (var meshLOD in meshLODs)
                 {
-                    ml.Generate();
+                    meshLOD.Generate();
                 }
             }
         }
@@ -590,7 +588,8 @@ namespace Unity.AutoLOD
         internal static LODData GetLODData(string assetPath)
         {
             var lodData = AssetDatabase.LoadAssetAtPath<LODData>(GetLODDataPath(assetPath));
-            if (!lodData)
+            bool hasLODData = lodData != null;
+            if (!hasLODData)
                 lodData = ScriptableObject.CreateInstance<LODData>();
 
             var overrideDefaults = lodData.overrideDefaults;
@@ -602,10 +601,11 @@ namespace Unity.AutoLOD
                 lodData.importSettings = importSettings;
             }
 
-            if (!overrideDefaults)
+            if (!overrideDefaults || !hasLODData)
             {
                 importSettings.generateOnImport = autoLODSettingsData.GenerateOnImport;
                 importSettings.meshSimplifier = autoLODSettingsData.MeshSimplifierType.AssemblyQualifiedName;
+                importSettings.batcher = autoLODSettingsData.BatcherType.AssemblyQualifiedName;
                 importSettings.maxLODGenerated = autoLODSettingsData.MaxLOD;
                 importSettings.initialLODMaxPolyCount = autoLODSettingsData.InitialLODMaxPolyCount;
                 importSettings.hierarchyType = autoLODSettingsData.HierarchyType;
