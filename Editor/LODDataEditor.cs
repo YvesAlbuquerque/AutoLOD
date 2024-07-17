@@ -32,7 +32,7 @@ namespace Unity.AutoLOD
             var settingsOverridden = m_OverrideDefaults.boolValue;
             EditorGUI.BeginChangeCheck();
             EditorGUILayout.PropertyField(m_OverrideDefaults, new GUIContent("Override Defaults"));
-            if (EditorGUI.EndChangeCheck() && m_OverrideDefaults.boolValue)
+            if (EditorGUI.EndChangeCheck() && settingsOverridden)
             {
                 m_ImportSettings.FindPropertyRelative("generateOnImport").boolValue = true;
                 m_ImportSettings.FindPropertyRelative("meshSimplifier").stringValue = autoLODSettingsData.MeshSimplifierType.AssemblyQualifiedName;
@@ -76,6 +76,7 @@ namespace Unity.AutoLOD
             }
             EditorGUI.EndDisabledGroup();
 
+            
             if (EditorGUI.EndChangeCheck())
                 serializedObject.ApplyModifiedProperties();
         }
