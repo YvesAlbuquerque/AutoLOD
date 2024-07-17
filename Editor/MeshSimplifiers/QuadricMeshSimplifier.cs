@@ -124,19 +124,6 @@ namespace Unity.AutoLOD
                 GUI.enabled = true;
             }
             EditorGUILayout.EndHorizontal();
-            if (property.isExpanded)
-            {
-                EditorGUI.indentLevel++;
-                property.NextVisible(true);
-                do
-                {
-                    EditorGUILayout.BeginHorizontal();
-                    EditorGUILayout.LabelField(property.name, GUILayout.Width(200f));
-                    EditorGUILayout.PropertyField(property, GUIContent.none, true, GUILayout.ExpandWidth(false));
-                    EditorGUILayout.EndHorizontal();
-                } while (property.NextVisible(false));
-                EditorGUI.indentLevel--;
-            }
 
             if (EditorGUI.EndChangeCheck())
             {
