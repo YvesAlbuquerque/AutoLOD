@@ -1,4 +1,3 @@
-using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -232,7 +231,7 @@ namespace Unity.AutoLOD
         }
         #endregion
 
-        #region Bather
+        #region Batcher
 
         public Type BatcherType
         {

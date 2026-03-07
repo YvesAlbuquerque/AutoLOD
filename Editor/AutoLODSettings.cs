@@ -163,7 +163,8 @@ namespace Unity.AutoLOD
         static void SaveAssetsGUI()
         {
             var label = new GUIContent("Save Assets",
-                "This can speed up performance, but may cause errors with some simplifiers");
+                "Controls whether AssetDatabase.SaveAssets is called after LOD generation. "
+                + "Disabling this can avoid errors when LODs are generated during asset import.");
             EditorGUI.BeginChangeCheck();
             var saveAssetsOnImport = EditorGUILayout.Toggle(label, autoLODSettingsData.SaveAssets);
             if (EditorGUI.EndChangeCheck())

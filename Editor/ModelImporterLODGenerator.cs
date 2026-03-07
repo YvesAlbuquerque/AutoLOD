@@ -361,9 +361,6 @@ namespace Unity.AutoLOD
             }
             
             ProcessMeshLODDependencies(meshLODs, preprocessMeshes);
-            
-            if (autoLODSettingsData.SaveAssets)
-                AssetDatabase.SaveAssets();
         }
 
         /// <summary>
@@ -604,8 +601,8 @@ namespace Unity.AutoLOD
             if (!overrideDefaults || !hasLODData)
             {
                 importSettings.generateOnImport = autoLODSettingsData.GenerateOnImport;
-                importSettings.meshSimplifier = autoLODSettingsData.MeshSimplifierType.AssemblyQualifiedName;
-                importSettings.batcher = autoLODSettingsData.BatcherType.AssemblyQualifiedName;
+                importSettings.meshSimplifier = autoLODSettingsData.MeshSimplifierType?.AssemblyQualifiedName;
+                importSettings.batcher = autoLODSettingsData.BatcherType?.AssemblyQualifiedName;
                 importSettings.maxLODGenerated = autoLODSettingsData.MaxLOD;
                 importSettings.initialLODMaxPolyCount = autoLODSettingsData.InitialLODMaxPolyCount;
                 importSettings.hierarchyType = autoLODSettingsData.HierarchyType;
