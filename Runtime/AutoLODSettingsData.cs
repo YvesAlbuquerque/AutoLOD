@@ -32,6 +32,8 @@ namespace Unity.AutoLOD
         [SerializeField] private bool showVolumeBounds = false;
         [SerializeField] private int maxLOD = AutoLODConst.k_DefaultMaxLOD;
         [SerializeField] private bool useSameMaterialForLODs = false;
+        [SerializeField] private LODFadeMode fadeMode = LODFadeMode.None;
+        [SerializeField] private bool animateCrossFading = false;
         
         [SerializeField] private List<Type> meshSimplifiers;
         [SerializeField] private List<Type> batchers;
@@ -365,6 +367,26 @@ namespace Unity.AutoLOD
             set
             {
                 useSameMaterialForLODs = value;
+                OnSettingsUpdated?.Invoke();
+            }
+        }
+
+        public LODFadeMode FadeMode
+        {
+            get => fadeMode;
+            set
+            {
+                fadeMode = value;
+                OnSettingsUpdated?.Invoke();
+            }
+        }
+
+        public bool AnimateCrossFading
+        {
+            get => animateCrossFading;
+            set
+            {
+                animateCrossFading = value;
                 OnSettingsUpdated?.Invoke();
             }
         }

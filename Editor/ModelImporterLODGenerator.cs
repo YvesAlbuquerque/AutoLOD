@@ -464,12 +464,20 @@ namespace Unity.AutoLOD
 
             for (int i = 0; i <= maxLODFound; i++)
             {
-                var lod = new LOD { renderers = lodData[i], screenRelativeTransitionHeight = GetScreenPercentage(i, maxLODFound, importerLODLevels) };
+                var renderers = lodData[i];
+                if (renderers != null)
+                    renderers = renderers.Where(r => r != null).ToArray();
+
+                var lod = new LOD { renderers = renderers ?? Array.Empty<Renderer>(), screenRelativeTransitionHeight = GetScreenPercentage(i, maxLODFound, importerLODLevels) };
                 lods.Add(lod);
             }
 
+            lodGroup.ForceLOD(0);
             lodGroup.SetLODs(lods.ToArray());
             lodGroup.RecalculateBounds();
+            lodGroup.fadeMode = autoLODSettingsData.FadeMode;
+            lodGroup.animateCrossFading = autoLODSettingsData.AnimateCrossFading;
+            lodGroup.ForceLOD(-1);
 
             SyncImporterLODLevels(importerRef, importerLODLevels, lods);
 
@@ -610,6 +618,8 @@ namespace Unity.AutoLOD
                 importSettings.initialLODMaxPolyCount = autoLODSettingsData.InitialLODMaxPolyCount;
                 importSettings.hierarchyType = autoLODSettingsData.HierarchyType;
                 importSettings.parentName = autoLODSettingsData.ParentName;
+                importSettings.fadeMode = autoLODSettingsData.FadeMode;
+                importSettings.animateCrossFading = autoLODSettingsData.AnimateCrossFading;
             }
 
             return lodData;

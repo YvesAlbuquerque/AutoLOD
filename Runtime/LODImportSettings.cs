@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 using UnityEngine.Serialization;
 
 namespace Unity.AutoLOD
@@ -13,5 +14,7 @@ namespace Unity.AutoLOD
         public int initialLODMaxPolyCount = Int32.MaxValue;
         public LODHierarchyType hierarchyType = LODHierarchyType.ChildOfSource;
         public string parentName = String.Empty;
+        public LODFadeMode fadeMode = LODFadeMode.None;
+        public bool animateCrossFading = false;
     }
 }
