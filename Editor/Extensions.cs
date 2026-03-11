@@ -1,25 +1,28 @@
 using UnityEngine;
 
-public static  class Extensions
+namespace Unity.AutoLOD
 {
-    public static bool HasLODChain(this LODGroup lodGroup)
+    public static class Extensions
     {
-        if (lodGroup != null)
+        public static bool HasLODChain(this LODGroup lodGroup)
         {
-            var lods = lodGroup.GetLODs();
-            if (lods.Length > 0)
+            if (lodGroup != null)
             {
-                for (var l = 1; l < lods.Length; l++)
+                var lods = lodGroup.GetLODs();
+                if (lods.Length > 0)
                 {
-                    var lod = lods[l];
-                    if (lod.renderers.Length > 0)
+                    for (var l = 1; l < lods.Length; l++)
                     {
-                        return true;
+                        var lod = lods[l];
+                        if (lod.renderers.Length > 0)
+                        {
+                            return true;
+                        }
                     }
                 }
             }
-        }
 
-        return false;
+            return false;
+        }
     }
 }

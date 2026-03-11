@@ -1,13 +1,5 @@
-using UnityEngine;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using Unity.AutoLOD;
-using Unity.AutoLOD.Utilities;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 namespace Unity.AutoLOD
 {
@@ -21,6 +13,9 @@ namespace Unity.AutoLOD
             {
                 m_LODGroup = value;
                 m_LODs = null;
+                m_ReferencePoint = null;
+                m_WorldSpaceSize = null;
+                m_MaxLOD = null;
             }
         }
 
