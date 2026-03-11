@@ -1,6 +1,9 @@
 using UnityEngine;
 
-public class AutoLODHelper
+namespace Unity.AutoLOD
 {
+    public class AutoLODHelper
+    {
     
+    }
 }

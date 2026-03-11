@@ -60,7 +60,7 @@ namespace Unity.AutoLOD
             get
             {
                 if (!m_MaxLOD.HasValue)
-                    m_MaxLOD = lodGroup.GetMaxLOD();
+                    m_MaxLOD = m_LODGroup ? m_LODGroup.GetMaxLOD() : 0;
 
                 return m_MaxLOD.Value;
             }
@@ -68,7 +68,6 @@ namespace Unity.AutoLOD
 
         [SerializeField] LODGroup m_LODGroup;
 
-        //Transform m_Transform;
         LOD[] m_LODs;
         Vector3? m_ReferencePoint;
         float? m_WorldSpaceSize;

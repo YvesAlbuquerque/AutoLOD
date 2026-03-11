@@ -414,6 +414,9 @@ namespace Unity.AutoLOD
             for (int i = 1; i <= LODData.MaxLOD; i++)
             {
                 var renderers = lodData[i];
+                if (renderers == null || renderers.Length == 0)
+                    break;
+
                 for (int j = 0; j < renderers.Length; j++)
                 {
                     var r = renderers[j];

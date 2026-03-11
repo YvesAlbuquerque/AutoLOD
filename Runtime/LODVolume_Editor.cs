@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Unity.AutoLOD;
 using Unity.AutoLOD.Utilities;
 using UnityEditor;
 using UnityEngine;
@@ -46,7 +45,7 @@ namespace Unity.AutoLOD
             var mergeChildrenVolumes = false;
             HashSet<Renderer> hlodRenderers = new HashSet<Renderer>();
 
-            var rendererMaterials = renderers.SelectMany(r => r.sharedMaterials);
+            var rendererMaterials = renderers.SelectMany(r => r.sharedMaterials).ToList();
             yield return null;
 
             foreach (Transform child in transform)
@@ -111,7 +110,6 @@ namespace Unity.AutoLOD
                 }
             }
 
-            var lodRenderers = new List<Renderer>();
             CleanupHLOD();
 
             GameObject hlodRootContainer = null;
@@ -177,8 +175,6 @@ namespace Unity.AutoLOD
                     var mr = child.GetComponent<MeshRenderer>();
                     EditorUtility.CopySerialized(r.GetComponent<MeshFilter>(), child.GetComponent<MeshFilter>());
                     EditorUtility.CopySerialized(r.GetComponent<MeshRenderer>(), mr);
-
-                    lodRenderers.Add(mr);
                 }
             }
 
@@ -230,7 +226,6 @@ namespace Unity.AutoLOD
 
                 var meshes = new List<Mesh>();
 
-                var totalMeshCount = maxLOD * lod0.renderers.Length;
                 for (int l = 1; l <= maxLOD; l++)
                 {
                     var lodRenderers = new List<MeshRenderer>();

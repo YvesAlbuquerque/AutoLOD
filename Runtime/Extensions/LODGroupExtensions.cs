@@ -52,8 +52,11 @@ namespace Unity.AutoLOD
 
         public static int GetCurrentLOD(this LODGroup lodGroup, Camera camera = null)
         {
+            if (!TryResolveCamera(ref camera))
+                return lodGroup.GetMaxLOD();
+
             var lods = lodGroup.GetLODs();
-            var relativeHeight = lodGroup.GetRelativeHeight(camera ?? Camera.current);
+            var relativeHeight = lodGroup.GetRelativeHeight(camera);
 
             var lodIndex = GetCurrentLOD(lods, lodGroup.GetMaxLOD(), relativeHeight, camera);
 
@@ -67,11 +70,21 @@ namespace Unity.AutoLOD
 
         public static int GetCurrentLOD(this LODGroupHelper lodGroupHelper, Camera camera = null, Vector3? cameraPosition = null)
         {
+            if (!TryResolveCamera(ref camera))
+                return lodGroupHelper.GetMaxLOD();
+
             var lods = lodGroupHelper.lods;
-            camera = camera ?? Camera.current;
             cameraPosition = cameraPosition ?? camera.transform.position;
             var relativeHeight = lodGroupHelper.GetRelativeHeight(camera, cameraPosition.Value);
             return GetCurrentLOD(lods, lodGroupHelper.GetMaxLOD(), relativeHeight, camera);
+        }
+
+        // Returns true if a valid camera was resolved; sets camera to Camera.current if the supplied value was null.
+        static bool TryResolveCamera(ref Camera camera)
+        {
+            if (!camera)
+                camera = Camera.current;
+            return camera;
         }
 
         public static float GetWorldSpaceSize(this LODGroup lodGroup)
