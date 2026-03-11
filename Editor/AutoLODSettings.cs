@@ -34,6 +34,7 @@ namespace Unity.AutoLOD
             GenerateLODsOnImportGUI();
             SaveAssetsGUI();
             SameMaterialLODsGUI();
+            FadeModeGUI();
             UseSceneLODGUI();
             HierarchyTypeGUI();
             ParentNameGUI();
@@ -178,6 +179,30 @@ namespace Unity.AutoLOD
             var useSameMaterial = EditorGUILayout.Toggle(label, autoLODSettingsData.UseSameMaterialForLODs);
             if (EditorGUI.EndChangeCheck())
                 autoLODSettingsData.UseSameMaterialForLODs = useSameMaterial;
+        }
+
+        static void FadeModeGUI()
+        {
+            var label = new GUIContent("LOD Fade Mode", "Controls how LOD levels transition. "
+                                                        + "None uses hard cuts between LODs. CrossFade enables blending between LOD levels "
+                                                        + "to reduce popping artifacts. SpeedTree is optimized for SpeedTree assets.");
+
+            EditorGUI.BeginChangeCheck();
+            var fadeModeValue = (LODFadeMode)EditorGUILayout.EnumPopup(label, autoLODSettingsData.FadeMode);
+            if (EditorGUI.EndChangeCheck())
+                autoLODSettingsData.FadeMode = fadeModeValue;
+
+            if (autoLODSettingsData.FadeMode != LODFadeMode.None)
+            {
+                EditorGUI.indentLevel++;
+                var animateLabel = new GUIContent("Animate Cross-Fading", "When enabled, Unity will automatically "
+                                                                          + "animate the transition between LOD levels over time for smoother visual results.");
+                EditorGUI.BeginChangeCheck();
+                var animate = EditorGUILayout.Toggle(animateLabel, autoLODSettingsData.AnimateCrossFading);
+                if (EditorGUI.EndChangeCheck())
+                    autoLODSettingsData.AnimateCrossFading = animate;
+                EditorGUI.indentLevel--;
+            }
         }
 
         static void UseSceneLODGUI()

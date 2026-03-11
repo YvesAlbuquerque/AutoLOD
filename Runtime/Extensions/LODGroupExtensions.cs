@@ -32,11 +32,17 @@ namespace Unity.AutoLOD
 
         static void SetRenderersEnabled(LOD[] lods, bool enabled)
         {
+            if (lods == null)
+                return;
+
             for (var i = 0; i < lods.Length; i++)
             {
                 var lod = lods[i];
 
                 var renderers = lod.renderers;
+                if (renderers == null)
+                    continue;
+
                 foreach (var r in renderers)
                 {
                     if (r)

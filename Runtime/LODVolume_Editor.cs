@@ -193,6 +193,8 @@ namespace Unity.AutoLOD
 
             lod.renderers = hlodRoot.GetComponentsInChildren<Renderer>(false);
             lodGroup.SetLODs(new LOD[] { lod });
+            lodGroup.fadeMode = AutoLODSettingsData.Instance.FadeMode;
+            lodGroup.animateCrossFading = AutoLODSettingsData.Instance.AnimateCrossFading;
 
             if (propagateUpwards)
             {
@@ -270,6 +272,8 @@ namespace Unity.AutoLOD
                 lodGroup.ForceLOD(0);
                 lodGroup.SetLODs(lods.ToArray());
                 lodGroup.RecalculateBounds();
+                lodGroup.fadeMode = AutoLODSettingsData.Instance.FadeMode;
+                lodGroup.animateCrossFading = AutoLODSettingsData.Instance.AnimateCrossFading;
                 lodGroup.ForceLOD(-1);
 
                 var prefab = PrefabUtility.GetCorrespondingObjectFromSource(go);
