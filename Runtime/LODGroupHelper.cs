@@ -1,13 +1,5 @@
-using UnityEngine;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using Unity.AutoLOD;
-using Unity.AutoLOD.Utilities;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 namespace Unity.AutoLOD
 {
@@ -21,6 +13,9 @@ namespace Unity.AutoLOD
             {
                 m_LODGroup = value;
                 m_LODs = null;
+                m_ReferencePoint = null;
+                m_WorldSpaceSize = null;
+                m_MaxLOD = null;
             }
         }
 
@@ -65,7 +60,7 @@ namespace Unity.AutoLOD
             get
             {
                 if (!m_MaxLOD.HasValue)
-                    m_MaxLOD = lodGroup.GetMaxLOD();
+                    m_MaxLOD = m_LODGroup ? m_LODGroup.GetMaxLOD() : 0;
 
                 return m_MaxLOD.Value;
             }
@@ -73,7 +68,6 @@ namespace Unity.AutoLOD
 
         [SerializeField] LODGroup m_LODGroup;
 
-        //Transform m_Transform;
         LOD[] m_LODs;
         Vector3? m_ReferencePoint;
         float? m_WorldSpaceSize;

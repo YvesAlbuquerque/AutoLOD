@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Unity.AutoLOD;
 using Unity.AutoLOD.Utilities;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -304,7 +303,7 @@ namespace Unity.AutoLOD
                 bounds.min + Vector3.up * bounds.size.y,
                 bounds.min + Vector3.right * bounds.size.x + Vector3.forward * bounds.size.z,
                 bounds.min + Vector3.right * bounds.size.x + Vector3.up * bounds.size.y,
-                bounds.min + Vector3.forward * bounds.size.x + Vector3.up * bounds.size.y,
+                bounds.min + Vector3.forward * bounds.size.z + Vector3.up * bounds.size.y,
                 bounds.min + Vector3.right * bounds.size.x + Vector3.forward * bounds.size.z +
                 Vector3.up * bounds.size.y
             };
@@ -418,8 +417,9 @@ namespace Unity.AutoLOD
             // Expand bounds side lengths to maintain a cube
             var maxSize = Mathf.Max(Mathf.Max(bounds.size.x, bounds.size.y), bounds.size.z);
             var extents = Vector3.one * maxSize * 0.5f;
-            bounds.center = bounds.min + extents;
+            var capturedMin = bounds.min;
             bounds.extents = extents;
+            bounds.center = capturedMin + extents;
 
             return bounds;
         }

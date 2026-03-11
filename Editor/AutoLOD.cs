@@ -74,14 +74,22 @@ namespace Unity.AutoLOD
                         var lodMF = lodTransform.GetComponent<MeshFilter>();
                         var lodRenderer = lodTransform.GetComponent<MeshRenderer>();
 
+                        var sourceMeshRenderer = mf.GetComponent<MeshRenderer>();
+                        if (!sourceMeshRenderer)
+                        {
+                            Debug.LogWarning("AutoLOD: Missing MeshRenderer on " + mf.name, mf);
+                            UnityObject.DestroyImmediate(lodTransform.gameObject);
+                            continue;
+                        }
+
                         lodRenderers.Add(lodRenderer);
 
                         EditorUtility.CopySerialized(mf, lodMF);
-                        EditorUtility.CopySerialized(mf.GetComponent<MeshRenderer>(), lodRenderer);
+                        EditorUtility.CopySerialized(sourceMeshRenderer, lodRenderer);
 
                         if (autoLODSettingsData.UseSameMaterialForLODs)
                         {
-                            lodRenderer.sharedMaterials = mf.GetComponent<MeshRenderer>().sharedMaterials;
+                            lodRenderer.sharedMaterials = sourceMeshRenderer.sharedMaterials;
                         }
 
                         var simplifiedMesh = new Mesh();

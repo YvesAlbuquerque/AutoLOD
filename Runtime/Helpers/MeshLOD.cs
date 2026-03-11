@@ -55,7 +55,7 @@ namespace Unity.AutoLOD
         IEnumerator UpdateMesh(JobHandle jobHandle, IMeshGenerateLODJob job)
         {
             while (!jobHandle.IsCompleted)
-                yield return new WaitForSecondsRealtime(0.5f);
+                yield return null;
 
             jobHandle.Complete();
 
@@ -74,7 +74,7 @@ namespace Unity.AutoLOD
             {
                 var jobDependency = jobDependencies[0];
                 if (!jobDependency.IsCompleted)
-                    yield return new WaitForSecondsRealtime(0.5f);
+                    yield return null;
                 else
                     jobDependencies.Remove(jobDependency);
             }
