@@ -12,10 +12,7 @@ namespace Unity.AutoLOD
             set
             {
                 m_LODGroup = value;
-                m_LODs = null;
-                m_ReferencePoint = null;
-                m_WorldSpaceSize = null;
-                m_MaxLOD = null;
+                InvalidateCache();
             }
         }
 
@@ -85,5 +82,4 @@ namespace Unity.AutoLOD
         float? m_WorldSpaceSize;
         int? m_MaxLOD;
     }
-
 }
