@@ -14,7 +14,7 @@ namespace Unity.AutoLOD
                     for (var l = 1; l < lods.Length; l++)
                     {
                         var lod = lods[l];
-                        if (lod.renderers.Length > 0)
+                        if (lod.renderers != null && lod.renderers.Length > 0)
                         {
                             return true;
                         }

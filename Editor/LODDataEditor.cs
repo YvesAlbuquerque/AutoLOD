@@ -41,6 +41,8 @@ namespace Unity.AutoLOD
                 m_ImportSettings.FindPropertyRelative("initialLODMaxPolyCount").intValue = autoLODSettingsData.InitialLODMaxPolyCount;
                 m_ImportSettings.FindPropertyRelative("hierarchyType").enumValueIndex = (int)autoLODSettingsData.HierarchyType;
                 m_ImportSettings.FindPropertyRelative("parentName").stringValue = autoLODSettingsData.ParentName;
+                m_ImportSettings.FindPropertyRelative("fadeMode").enumValueIndex = (int)autoLODSettingsData.FadeMode;
+                m_ImportSettings.FindPropertyRelative("animateCrossFading").boolValue = autoLODSettingsData.AnimateCrossFading;
             }
 
             if (settingsOverridden)

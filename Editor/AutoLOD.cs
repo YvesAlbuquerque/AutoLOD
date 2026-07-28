@@ -114,6 +114,8 @@ namespace Unity.AutoLOD
                 lodGroup.ForceLOD(0);
                 lodGroup.SetLODs(lods.ToArray());
                 lodGroup.RecalculateBounds();
+                lodGroup.fadeMode = autoLODSettingsData.FadeMode;
+                lodGroup.animateCrossFading = autoLODSettingsData.AnimateCrossFading;
                 lodGroup.ForceLOD(-1);
 
                 var prefab = PrefabUtility.GetCorrespondingObjectFromSource(go);

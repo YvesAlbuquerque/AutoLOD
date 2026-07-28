@@ -12,10 +12,7 @@ namespace Unity.AutoLOD
             set
             {
                 m_LODGroup = value;
-                m_LODs = null;
-                m_ReferencePoint = null;
-                m_WorldSpaceSize = null;
-                m_MaxLOD = null;
+                InvalidateCache();
             }
         }
 
@@ -66,6 +63,18 @@ namespace Unity.AutoLOD
             }
         }
 
+        /// <summary>
+        /// Invalidates all cached LODGroup data, forcing it to be re-fetched on next access.
+        /// Call this after modifying the LODGroup's LODs, transform, or size externally.
+        /// </summary>
+        public void InvalidateCache()
+        {
+            m_LODs = null;
+            m_ReferencePoint = null;
+            m_WorldSpaceSize = null;
+            m_MaxLOD = null;
+        }
+
         [SerializeField] LODGroup m_LODGroup;
 
         LOD[] m_LODs;
@@ -73,5 +82,4 @@ namespace Unity.AutoLOD
         float? m_WorldSpaceSize;
         int? m_MaxLOD;
     }
-
 }
